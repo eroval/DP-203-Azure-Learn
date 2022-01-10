@@ -1,0 +1,125 @@
+Connect to application storage account:
+
+// open editor:
+. code
+
+// run the app
+node index.js (when it is created)
+
+
+//initialize package.json  (in console)
+npm init -y
+
+
+//create index.js  (in console)
+touch index.js
+
+
+//contents of index.js:
+#!/usr/bin/env Node
+
+function main(){
+    console.log("Hello, world!");
+}
+
+main();
+
+
+
+//creating the account  (in console)
+az storage acount create --name "lkaslglk2" \
+--resource-group "learn-0fa6a8e6-6845-4ab3-8b12-c5c30fb95a39" \
+--location "westeurope" \
+--sku "Standard_LRS"
+
+
+//bind azure blob  (in console)
+npm install @azure/storage-blob --save
+
+
+//create .env  (in console)
+touch .env
+
+
+//obtain account connection string
+az storage account show-connection-string \
+--resource-group learn-0fa6a8e6-6845-4ab3-8b12-c5c30fb95a39 \
+--query connectionString \
+--name "lkaslglk2"
+
+//contents of .env from the connection string:
+AZURE_STORAGE_CONNECTION_STRING=
+" 
+DefaultEndpointsProtocol=https;
+EndpointSuffix=core.windows.net;AccountName=lkaslglk2;
+AccountKey=0NrzjT105WiYuq1GX/YWzChDLBFjP/PTXvd8w5+gnvT4xeBz5KHyPm5YZnx/YRkJ20wPsGsiyur7qlPlp67Jkg==
+"
+(all on one line)
+
+
+//install dotenv  (in console)
+npm install dotenv --save
+
+
+//contents of index.js:
+#!/usr/bin/env Node
+require('dotenv').config();
+
+function main(){
+    console.log("Hello, world!");
+}
+
+main();
+
+
+//contents of index.js:
+#!/usr/bin/env Node
+require('dotenv').config();
+const { BlobServiceClient } = require("@azure/storage-blob");
+const storageAccountConnectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+const blobServiceClient = BlobServiceClient.fromConnectionString(storageAccountConnectionString);
+
+async function main(){
+    const containerName = 'photos';
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const createContainerResponse = await containerClient.createIfNotExists();
+    console.log(`Create container ${containerName} successfully`, createContainerResponse.succeeded);
+}
+
+main();
+
+
+//verify created container (in console):
+az storage container list --account-name lkaslglk2
+
+
+
+//download sample image:
+wget https://github.com/MicrosoftDocs/mslearn-connect-app-to-azure-storage/blob/main/images/docs-and-friends-selfie-stick.png?raw=true -O docs-and-friends-selfie-stick.png
+
+
+//contents of index.js:
+#!/usr/bin/env Node
+require('dotenv').config();
+const { BlobServiceClient } = require("@azure/storage-blob");
+const storageAccountConnectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+const blobServiceClient = BlobServiceClient.fromConnectionString(storageAccountConnectionString);
+
+async function main(){
+    const containerName = 'photos';
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const createContainerResponse = await containerClient.createIfNotExists();
+    console.log(`Create container ${containerName} successfully`, createContainerResponse.succeeded);
+    const filename = 'docs-and-friends-selfie-stick.png';
+    const blockBlobClient = containerClient.getBlockBlobClient(filename);
+    blockBlobClient.uploadFile(filename);
+    let blobs = containerClient.listBlobsFlat();
+    let blob = await blobs.next();
+    while (!blob.done) {
+        console.log(`${blob.value.name} --> Created: ${blob.value.properties.createdOn}   Size: ${blob.value.properties.contentLength}`);
+        blob = await blobs.next();
+    }
+}
+
+main();
+
