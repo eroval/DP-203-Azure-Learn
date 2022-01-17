@@ -3,9 +3,8 @@
 -- Never use the admin account for load operations.
 -- Create a seperate user for load operations
 
-
--- This has to be run in the master database
-CREATE LOGIN user_load WITH PASSWORD = 'Azure@123';
+-- in systemdatabases/master.db
+CREATE LOGIN user_load WITH PASSWORD = '$SuperLooper98';
 
 CREATE USER user_load FOR LOGIN user_load;
 GRANT ADMINISTER DATABASE BULK OPERATIONS TO user_load;
@@ -25,14 +24,11 @@ WITH (
     ,MEMBERNAME = 'user_load'
 );
 
--- Drop the external table if it exists
-DROP EXTERNAL TABLE logdata
-
 -- Create a normal table
 -- Login as the new user and create the table
 -- Here I have added more constraints when it comes to the width of the data type
 
-CREATE TABLE [logdata]
+CREATE TABLE [logdata_user_test]
 (
     [Id] [int] NULL,
 	[Correlationid] [varchar](200) NULL,
@@ -57,15 +53,14 @@ GRANT SELECT ON logdata TO user_load;
 -- https://docs.microsoft.com/en-us/sql/t-sql/statements/copy-into-transact-sql?view=azure-sqldw-latest&preserve-view=true
 
 
-SELECT * FROM [logdata]
-
--- Here there is no authentication/authorization, so you need to allow public access for the container
-COPY INTO logdata FROM 'https://appdatalake7000.blob.core.windows.net/data/Log.csv'
-WITH
-(
-FIRSTROW=2
-)
+-- COPY FROM EXTERNAL TABLE
+INSERT INTO [logdata_user_test]
+SELECT * FROM [logdata];
+-- OR
+COPY INTO logdata_user_test FROM 'https://h24pgen2.blob.core.windows.net/data/raw/Log.csv'
+WITH (FIRSTROW=2);
 
 
 
 
+SELECT * FROM [logdata_user_test];
