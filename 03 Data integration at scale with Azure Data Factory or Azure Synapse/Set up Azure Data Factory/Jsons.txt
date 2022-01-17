@@ -1,0 +1,129 @@
+//Data Factory
+######################################################################
+##                PART I: Creating an Azure Data Factory            ##
+######################################################################
+
+
+# Sign in to Azure and set the WINDOWS AZURE subscription to work with
+$SubscriptionId = "add your subscription in the quotes"
+
+Add-AzureRmAccount
+Set-AzureRmContext -SubscriptionId $SubscriptionId
+
+# register the Microsoft Azure Data Factory resource provider
+Register-AzureRmResourceProvider -ProviderNamespace Microsoft.DataFactory
+
+# DEFINE RESOURCE GROUP NAME AND LOCATION PARAMETERS
+$resourceGroupName = "cto_ignite"
+$rglocation = "West US 2"
+
+# CREATE AZURE DATA FACTORY
+New-AzureRmDataFactoryV2 -ResourceGroupName $resourceGroupName -Name "ctoigniteADF" -Location $rglocation
+
+
+//LinkedServices JSON
+{
+    "name": "<Name of the linked service>",
+    "properties": {
+        "type": "<Type of the linked service>",
+        "typeProperties": {
+              "<data store or compute-specific type properties>"
+        },
+        "connectVia": {
+            "referenceName": "<name of Integration Runtime>",
+            "type": "IntegrationRuntimeReference"
+        }
+    }
+}
+
+	//Examples:
+	~ Azure SQL Database:
+	{
+  	"name": "AzureSqlLinkedService",
+  	"properties": {
+    	"type": "AzureSqlDatabase",
+    	"typeProperties": {
+    	  "connectionString": "Server=tcp:<server-name>.database.windows.net,1433;Database=ctosqldb;User ID=ctesta-oneill;Password=P@ssw0rd;Trusted_Connection=False;Encrypt=True;Connection Timeout=30"
+  	  }
+ 	 }
+	}
+
+	Azure Blob Storage:
+	{
+ 	 "name": "StorageLinkedService",
+ 	 "properties": {
+ 	   "type": "AzureStorage",
+  	  "typeProperties": {
+  	    "connectionString": "DefaultEndpointsProtocol=https;AccountName=ctostorageaccount;AccountKey=<account-key>"
+  	  }
+ 	 }
+	}
+
+
+//Dataset JSON:
+{
+    "name": "<name of dataset>",
+    "properties": {
+        "type": "<type of dataset: AzureBlob, AzureSql etc...>",
+        "linkedServiceName": {
+                "referenceName": "<name of linked service>",
+                "type": "LinkedServiceReference",
+        },
+        "schema": [
+            {
+                "name": "<Name of the column>",
+                "type": "<Name of the type>"
+            }
+        ],
+        "typeProperties": {
+            "<type specific property>": "<value>",
+            "<type specific property 2>": "<value 2>",
+        }
+    }
+}
+
+
+//Activities JSON:
+{
+    "name": "Execution Activity Name",
+    "description": "description",
+    "type": "<ActivityType>",
+    "typeProperties":
+    {
+    },
+    "linkedServiceName": "MyLinkedService",
+    "policy":
+    {
+    },
+    "dependsOn":
+    {
+    }
+}
+
+	~ Control Activity:
+	{
+ 	   "name": "Control Activity Name",
+ 	   "description": "description",
+  	  "type": "<ActivityType>",
+ 	   "typeProperties":
+ 	   {
+ 	   },
+ 	   "dependsOn":
+ 	   {
+ 	   }
+	}
+
+
+//Pipelines:
+{
+    "name": "PipelineName",
+    "properties":
+    {
+        "description": "pipeline description",
+        "activities":
+        [
+        ],
+        "parameters": {
+         }
+    }
+}

@@ -1,0 +1,18 @@
+
+# set up acc for access
+blobacc = "demotestacc"
+blobcon = "output"
+filePath = "part-00000-tid-2729159199154434995-0e14cf99-b0fa-49c7-a82f-ce7f8df5ae7e-1-1-c000.json"
+blobToken = "sp=r&st=2022-01-13T12:16:08Z&se=2022-01-13T20:16:08Z&spr=https&sv=2020-08-04&sr=c&sig=
+EA8lCaVit5PecLohDr3MBIf%2BuzHqU7Z66ZlhIsBVdvc%3D"
+
+# file location & token
+wasbs_path = 'wasbs://%s@%s.blob.core.windows.net%s' % (blobcon, blobacc, filePath)
+spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (blobcon, blobacc), blobToken)
+print(wasbs_path)
+
+# read
+df = spark.read.json(wasbs_path)
+# print
+df.printSchema()
+df.show()
