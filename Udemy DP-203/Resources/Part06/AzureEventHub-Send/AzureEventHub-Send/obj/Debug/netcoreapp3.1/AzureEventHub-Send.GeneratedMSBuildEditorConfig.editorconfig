@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = AzureEventHub_Send
+build_property.ProjectDir = D:\Github\DP-203-Azure-Learn\Udemy DP-203\Resources\Part06\AzureEventHub-Send\AzureEventHub-Send\
